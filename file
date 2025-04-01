@@ -1,0 +1,87 @@
+# Re-import necessary libraries after code execution state reset
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+
+# Recreate the dataset
+data = {
+    "Borehole": [f"BH{i}" for i in range(1, 51)],
+    "Lat": [
+        5.036889, 5.01975, 5.016722, 5.002366, 4.957417, 4.94325, 4.908472, 4.929167, 4.917722, 4.91175,
+        4.925861, 4.916, 4.917028, 4.903722, 4.91125, 5.026869, 5.002678, 4.992793, 4.98176, 4.953314,
+        4.952838, 4.94409, 4.940728, 4.933825, 4.916093, 4.935199, 4.923142, 4.905837, 4.918221, 4.899849,
+        4.983667, 4.987861, 5.000389, 4.999861, 4.999656, 4.999222, 5.004056, 5.032306, 5.033528, 5.034,
+        5.033361, 5.038194, 5.038, 5.035417, 5.034306, 5.03425, 4.996806, 5.001417, 5.000861, 5.000639
+    ],
+    "Long": [
+        6.405972, 6.398167, 6.396528, 6.387691, 6.35375, 6.324806, 6.337083, 6.300806, 6.317583, 6.305972,
+        6.275583, 6.2755, 6.251222, 6.251222, 6.255611, 6.398981, 6.379307, 6.375336, 6.37166, 6.355015,
+        6.34541, 6.331098, 6.326492, 6.307698, 6.301615, 6.285502, 6.272686, 6.258554, 6.25624, 6.269169,
+        6.276111, 6.275722, 6.279556, 6.280667, 6.279361, 6.2785, 6.294028, 6.312556, 6.311917, 6.311778,
+        6.311056, 6.323444, 6.319889, 6.321361, 6.318833, 6.31789, 6.262944, 6.263, 6.265528, 6.266833
+    ],
+    "Town": [
+        "Igbogene 1", "Yenagwe1", "Yenagwe 2", "Akenfa 1", "Etegwe 1", "Biogbolo 1", "Kpansia 1", "Ekeki 1",
+        "Kpansia 1", "Yenizue Epie 1", "Amarata 1", "Swail 1", "Ogbogoro 1", "Ogu 1", "Akaba 1", "Igbogene 2",
+        "Akenfa 2", "Agudama 1", "Agudama 2", "Etegwe 2", "Okutukutu 1", "Opolo 1", "Opolo 2", "Kpansia 2",
+        "Yenizue Epie 2", "Amarata 2", "Swail 2", "Akaba 2", "Ogbogoro 2", "Ogu 2", "Akaibiri 1", "Akaibiri 1",
+        "Gbarantoru 1", "Gbarantoru 2", "Gbarantoru 3", "Gbarantoru 4", "Gbarantoru 5", "Ogbuna 1", "Ogbuna 2",
+        "Ogbuna 3", "Ogbuna 4", "Okolobiri 1", "Okolobiri 2", "Okolobiri 3", "Okolobiri 4", "Okolobiri 5",
+        "Tombia 1", "Tombia 2", "Tombia 3", "Tombia 4"
+    ],
+    "Iron": [
+        0.6, 0.14, 0.4, 0.37, 0.38, 0.3, 0.15, 0.35, 0.14, 0.36,
+        0.16, 0.36, 0.26, 0.12, 0.18, 0.39, 0.4, 0.7, 0.68, 0.8,
+        0.32, 0.65, 0.4, 0.11, 0.44, 0.112, 0.35, 0.4, 0.12, 0.43,
+        0.31, 0.364, 0.136, 0.32, 0.36, 0.132, 0.38, 0.348, 0.186, 0.36,
+        0.372, 0.388, 0.374, 0.328, 0.146, 0.346, 0.33, 0.39, 0.136, 0.382
+    ]
+}
+df = pd.DataFrame(data)
+
+# Prepare features and target
+X = df[['Lat', 'Long', 'Town']]
+y = df['Iron']
+
+# One-hot encode the 'Town' categorical feature
+encoder = OneHotEncoder(sparse=False)
+X_encoded = encoder.fit_transform(X[['Town']])
+encoded_feature_names = encoder.get_feature_names_out(['Town'])
+
+# Combine encoded town features with latitude and longitude
+X_numeric = X[['Lat', 'Long']].reset_index(drop=True)
+X_processed = pd.concat([X_numeric, pd.DataFrame(X_encoded, columns=encoded_feature_names)], axis=1)
+
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(X_processed, y, test_size=0.2, random_state=42)
+
+# Train models
+lr = LinearRegression().fit(X_train, y_train)
+rf = RandomForestRegressor(n_estimators=100, random_state=42).fit(X_train, y_train)
+
+# Predict and evaluate
+y_pred_lr = lr.predict(X_test)
+y_pred_rf = rf.predict(X_test)
+
+def evaluate_model(y_true, y_pred):
+    return {
+        "MAE": mean_absolute_error(y_true, y_pred),
+        "RMSE": np.sqrt(mean_squared_error(y_true, y_pred)),
+        "R2": r2_score(y_true, y_pred)
+    }
+
+lr_metrics = evaluate_model(y_test, y_pred_lr)
+rf_metrics = evaluate_model(y_test, y_pred_rf)
+
+validation_results = pd.DataFrame({
+    "Model": ["Linear Regression", "Random Forest"],
+    "MAE": [lr_metrics["MAE"], rf_metrics["MAE"]],
+    "RMSE": [lr_metrics["RMSE"], rf_metrics["RMSE"]],
+    "R2": [lr_metrics["R2"], rf_metrics["R2"]]
+})
+
+import ace_tools as tools; tools.display_dataframe_to_user(name="Model Validation Results", dataframe=validation_results)
