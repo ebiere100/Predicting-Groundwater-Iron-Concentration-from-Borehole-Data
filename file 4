@@ -1,0 +1,10 @@
+# Generate spatial map of iron concentration by coordinates
+plt.figure(figsize=(8, 6))
+sc = plt.scatter(df['Long'], df['Lat'], c=df['Iron'], cmap='viridis', s=100, edgecolor='k')
+plt.colorbar(sc, label='Iron Concentration (mg/L)')
+plt.xlabel('Longitude')
+plt.ylabel('Latitude')
+plt.title('Spatial Distribution of Iron Concentration in Groundwater')
+plt.grid(True)
+plt.tight_layout()
+plt.savefig("/mnt/data/spatial_distribution_map.png")
