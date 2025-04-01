@@ -1,0 +1,95 @@
+from docx import Document
+from docx.shared import Inches
+
+# Create a new Word document
+doc = Document()
+
+# Title and Author
+doc.add_heading("Predictive Modeling of Iron Concentration in Groundwater Using Machine Learning Techniques", 0)
+doc.add_paragraph("Author: Agbozu Ebingiye Nelvin")
+doc.add_paragraph("Affiliation: Department of Environmental and Earth Sciences, [University/Institution], [City], Nigeria")
+doc.add_paragraph("Corresponding Author: Agbozu Ebingiye Nelvin (Email: [email])")
+
+# Abstract
+doc.add_heading("Abstract", level=1)
+doc.add_paragraph(
+    "This study explores the application of machine learning models for predicting iron concentration in groundwater "
+    "using spatial data derived from boreholes in Yenagoa, Nigeria. A dataset comprising 50 boreholes with geographic "
+    "coordinates and iron concentration measurements was analyzed. Two regression models—Multiple Linear Regression (MLR) "
+    "and Random Forest Regression (RFR)—were developed to predict iron concentration based on latitude, longitude, and town location. "
+    "The linear regression model achieved superior performance with an R² of 0.92 on the test set, compared to 0.89 for the random forest model. "
+    "Longitude and town location were the most influential predictors. Spatial visualization revealed an east-west gradient in iron levels, "
+    "highlighting the utility of geographic features in environmental modeling."
+)
+
+# Keywords
+doc.add_paragraph("Keywords: Iron concentration, Groundwater, Machine learning, Spatial analysis, Regression, Nigeria")
+
+# Main sections
+sections = [
+    ("1 Introduction", 
+     "Groundwater contamination poses significant environmental and public health risks..."),
+
+    ("2 Materials and Methods", 
+     "2.1 Study Area\nYenagoa is located in the Niger Delta region of Nigeria, characterized by tropical wetlands and mangrove ecosystems...\n\n"
+     "2.2 Data Collection\nEach borehole entry consists of: Latitude, Longitude, Town name, and Measured iron concentration (mg/L)...\n\n"
+     "2.3 Data Preprocessing\nCategorical town names were encoded using one-hot encoding...\n\n"
+     "2.4 Exploratory Data Analysis\nSummary statistics revealed iron concentration varies widely across towns..."),
+
+    ("3 Modeling Approach", 
+     "3.1 Model Selection\nTwo models were trained: MLR and RFR...\n\n"
+     "3.2 Model Training\nData split into training (80%) and test (20%)...\n\n"
+     "3.3 Model Evaluation\nMetrics used include MAE, RMSE, and R²..."),
+
+    ("4 Results", 
+     "4.1 Feature Importance\nTown categories had high coefficient magnitudes in MLR...\n\n"
+     "4.2 Predicted vs Actual\nBoth models demonstrate strong correlation...\n\n"
+     "4.3 Spatial Patterns\nHigh-iron areas are clustered in eastern towns...")
+]
+
+# Add main content
+for title, content in sections:
+    doc.add_heading(title, level=1)
+    for line in content.split("\n"):
+        doc.add_paragraph(line)
+
+# Add Figures
+doc.add_heading("Figures", level=1)
+
+doc.add_paragraph("Figure 1: Feature importance in Random Forest model")
+doc.add_picture("/mnt/data/feature_importance_rf.png", width=Inches(5.5))
+
+doc.add_paragraph("Figure 2: Predicted vs Actual Iron Concentration - Linear Regression")
+doc.add_picture("/mnt/data/predicted_vs_actual_lr.png", width=Inches(5.5))
+
+doc.add_paragraph("Figure 3: Predicted vs Actual Iron Concentration - Random Forest")
+doc.add_picture("/mnt/data/predicted_vs_actual_rf.png", width=Inches(5.5))
+
+doc.add_paragraph("Figure 4: Spatial distribution of iron concentration across boreholes")
+doc.add_picture("/mnt/data/spatial_distribution_map.png", width=Inches(5.5))
+
+# Conclusion
+doc.add_heading("5 Conclusion", level=1)
+doc.add_paragraph(
+    "Machine learning models, particularly linear regression, effectively predict iron concentrations in groundwater using geographic "
+    "and categorical data. The addition of spatial maps confirmed distinct clusters of high and low iron concentrations across the study area..."
+)
+
+# Acknowledgements
+doc.add_heading("Acknowledgements", level=1)
+doc.add_paragraph("The author thanks [relevant agency/institution] for providing borehole data.")
+
+# References
+doc.add_heading("References", level=1)
+doc.add_paragraph(
+    "Nguyen, T. H., et al. (2022). Predicting heavy metal concentrations in groundwater using machine learning techniques. "
+    "Environmental Monitoring and Assessment, 194(8), 535.\n"
+    "Chowdhury, T. D., et al. (2017). Spatial variation of iron in groundwater: A case study of Sylhet, Bangladesh. Groundwater for Sustainable Development, 5, 60–68.\n"
+    "Scikit-learn Documentation (2023). Feature importance and model evaluation metrics. Available at: https://scikit-learn.org/\n"
+    "DataCamp (2021). One-Hot Encoding in Python with Pandas and Scikit-Learn. Available at: https://www.datacamp.com/"
+)
+
+# Save the document
+doc_path = "/mnt/data/Iron_Concentration_Modeling_Report.docx"
+doc.save(doc_path)
+doc_path
